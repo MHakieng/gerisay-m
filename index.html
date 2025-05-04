@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Geri Sayım</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #ff2a6d;
+            text-shadow: 0 0 10px rgba(255, 42, 109, 0.5);
+        }
+
+        .timer-display {
+            font-size: 5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            font-family: monospace;
+            letter-spacing: 5px;
+        }
+
+        .timer-display.ending {
+            color: #ff2a6d;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .inputs {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            width: 30%;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            color: #ccc;
+        }
+
+        input {
+            padding: 0.75rem;
+            border-radius: 10px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        input:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .presets {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .preset-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .preset-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #start-btn {
+            background-color: #05d9e8;
+            color: #1a1a2e;
+        }
+
+        #pause-btn {
+            background-color: #ff9e00;
+            color: #1a1a2e;
+        }
+
+        #reset-btn {
+            background-color: #ff2a6d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #05d9e8, #ff2a6d);
+            border-radius: 5px;
+            transition: width 1s linear;
+        }
+
+        @media (max-width: 600px) {
+            .timer-display {
+                font-size: 3.5rem;
+            }
+            
+            .inputs {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .input-group {
+                width: 80%;
+            }
+            
+            .buttons {
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                width: 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Geri Sayım</h1>
+        
+        <div id="timer" class="timer-display">00:00:00</div>
+        
+        <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+        </div>
+        
+        <div class="inputs">
+            <div class="input-group">
+                <label for="hours">Saat</label>
+                <input type="number" id="hours" min="0" max="99" value="0">
+            </div>
+            
+            <div class="input-group">
+                <label for="minutes">Dakika</label>
+                <input type="number" id="minutes" min="0" max="59" value="0">
+            </div>
+            
+            <div class="input-group">
+                <label for="seconds">Saniye</label>
+                <input type="number" id="seconds" min="0" max="59" value="0">
+            </div>
+        </div>
+        
+        <div class="presets">
+            <button class="preset-btn" data-time="60">1 dk</button>
+            <button class="preset-btn" data-time="300">5 dk</button>
+            <button class="preset-btn" data-time="600">10 dk</button>
+            <button class="preset-btn" data-time="1800">30 dk</button>
+        </div>
+        
+        <div class="buttons">
+            <button id="start-btn" class="btn">Başlat</button>
+            <button id="pause-btn" class="btn" disabled>Duraklat</button>
+            <button id="reset-btn" class="btn">Sıfırla</button>
+        </div>
+    </div>
+
+    <script>
+        // Pure Functions
+        const formatTimeUnit = (unit) => String(unit).padStart(2, '0');
+        
+        const formatTime = (hours, minutes, seconds) => 
+            `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}:${formatTimeUnit(seconds)}`;
+        
+        const calculateTotalSeconds = (hours, minutes, seconds) => 
+            (Number(hours) * 3600) + (Number(minutes) * 60) + Number(seconds);
+        
+        const secondsToTimeUnits = (totalSeconds) => {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return { hours, minutes, seconds };
+        };
+        
+        const validateInput = (value, min, max) => {
+            const num = Number(value) || 0;
+            return Math.max(min, Math.min(num, max));
+        };
+        
+        // Application State
+        const createInitialState = () => ({
+            totalSeconds: 0,
+            originalTotalSeconds: 0,
+            isRunning: false,
+            timerId: null
+        });
+        
+        let state = createInitialState();
+        
+        // DOM Elements
+        const elements = {
+            timerDisplay: document.getElementById('timer'),
+            progressBar: document.getElementById('progress'),
+            hoursInput: document.getElementById('hours'),
+            minutesInput: document.getElementById('minutes'),
+            secondsInput: document.getElementById('seconds'),
+            startBtn: document.getElementById('start-btn'),
+            pauseBtn: document.getElementById('pause-btn'),
+            resetBtn: document.getElementById('reset-btn'),
+            presetBtns: document.querySelectorAll('.preset-btn')
+        };
+        
+        // UI Update Functions
+        const updateTimerDisplay = (state) => {
+            const { hours, minutes, seconds } = secondsToTimeUnits(state.totalSeconds);
+            elements.timerDisplay.textContent = formatTime(hours, minutes, seconds);
+            
+            // Add visual effect when less than 10 seconds remain
+            if (state.totalSeconds <= 10 && state.isRunning) {
+                elements.timerDisplay.classList.add('ending');
+            } else {
+                elements.timerDisplay.classList.remove('ending');
+            }
+        };
+        
+        const updateButtonStates = (state) => {
+            elements.startBtn.disabled = state.isRunning;
+            elements.pauseBtn.disabled = !state.isRunning;
+        };
+        
+        const updateProgressBar = (state) => {
+            if (state.originalTotalSeconds > 0) {
+                const progress = (state.totalSeconds / state.originalTotalSeconds) * 100;
+                elements.progressBar.style.width = `${progress}%`;
+            } else {
+                elements.progressBar.style.width = '100%';
+            }
+        };
+        
+        // State Update Function
+        const updateState = (newState) => {
+            state = { ...state, ...newState };
+            updateTimerDisplay(state);
+            updateButtonStates(state);
+            updateProgressBar(state);
+            return state;
+        };
+        
+        // Timer Logic
+        const startCountdown = () => {
+            if (state.totalSeconds <= 0) {
+                timerComplete();
+                return;
+            }
+            
+            updateState({
+                totalSeconds: state.totalSeconds - 1,
+                isRunning: true
+            });
+            
+            state.timerId = setTimeout(startCountdown, 1000);
+        };
+        
+        const timerComplete = () => {
+            updateState({ isRunning: false, timerId: null });
+            
+            // Play alert sound
+            try {
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+                audio.play();
+            } catch (e) {
+                console.log('Audio playback failed:', e);
+            }
+            
+            // Visual notification
+            elements.timerDisplay.classList.add('ending');
+            
+            // Browser notification if supported
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Geri Sayım Tamamlandı!');
+            }
+        };
+        
+        // Event Handlers
+        const handleStart = () => {
+            if (state.isRunning) return;
+            
+            // Get and validate input values if timer is not already running
+            if (state.totalSeconds <= 0) {
+                const hours = validateInput(elements.hoursInput.value, 0, 99);
+                const minutes = validateInput(elements.minutesInput.value, 0, 59);
+                const seconds = validateInput(elements.secondsInput.value, 0, 59);
+                
+                // Update inputs with validated values
+                elements.hoursInput.value = hours;
+                elements.minutesInput.value = minutes;
+                elements.secondsInput.value = seconds;
+                
+                const totalSeconds = calculateTotalSeconds(hours, minutes, seconds);
+                
+                if (totalSeconds <= 0) return; // Don't start if no time is set
+                
+                updateState({
+                    totalSeconds,
+                    originalTotalSeconds: totalSeconds
+                });
+            }
+            
+            updateState({ isRunning: true });
+            startCountdown();
+        };
+        
+        const handlePause = () => {
+            if (!state.isRunning) return;
+            
+            clearTimeout(state.timerId);
+            updateState({ isRunning: false, timerId: null });
+        };
+        
+        const handleReset = () => {
+            clearTimeout(state.timerId);
+            
+            // Reset input fields
+            elements.hoursInput.value = 0;
+            elements.minutesInput.value = 0;
+            elements.secondsInput.value = 0;
+            
+            // Reset timer display
+            elements.timerDisplay.classList.remove('ending');
+            
+            updateState({
+                totalSeconds: 0,
+                originalTotalSeconds: 0,
+                isRunning: false,
+                timerId: null
+            });
+        };
+        
+        const handlePresetClick = (e) => {
+            const seconds = Number(e.target.dataset.time);
+            if (!seconds) return;
+            
+            // Stop current timer if running
+            if (state.isRunning) {
+                clearTimeout(state.timerId);
+            }
+            
+            // Calculate and set input fields
+            const { hours, minutes, seconds: secs } = secondsToTimeUnits(seconds);
+            elements.hoursInput.value = hours;
+            elements.minutesInput.value = minutes;
+            elements.secondsInput.value = secs;
+            
+            // Update state
+            updateState({
+                totalSeconds: seconds,
+                originalTotalSeconds: seconds,
+                isRunning: false,
+                timerId: null
+            });
+        };
+        
+        // Initialize App
+        const initApp = () => {
+            // Request notification permission
+            if ('Notification' in window && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+            
+            // Set initial UI state
+            updateTimerDisplay(state);
+            updateButtonStates(state);
+            updateProgressBar(state);
+            
+            // Add event listeners
+            elements.startBtn.addEventListener('click', handleStart);
+            elements.pauseBtn.addEventListener('click', handlePause);
+            elements.resetBtn.addEventListener('click', handleReset);
+            
+            // Add event listeners to preset buttons
+            elements.presetBtns.forEach(btn => {
+                btn.addEventListener('click', handlePresetClick);
+            });
+            
+            // Input validation on change
+            elements.hoursInput.addEventListener('change', () => {
+                elements.hoursInput.value = validateInput(elements.hoursInput.value, 0, 99);
+            });
+            
+            elements.minutesInput.addEventListener('change', () => {
+                elements.minutesInput.value = validateInput(elements.minutesInput.value, 0, 59);
+            });
+            
+            elements.secondsInput.addEventListener('change', () => {
+                elements.secondsInput.value = validateInput(elements.secondsInput.value, 0, 59);
+            });
+        };
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html> 
